@@ -1,0 +1,88 @@
+a {
+    color: #567;
+}
+.home {
+    max-width: 90%;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.home .left-panel {
+    margin: 0 2% 0 0;
+    flex: 2.5 1 auto;
+    max-width: 75%;
+}
+
+.left-panel .title {
+     border-bottom: 1px solid #d3d3d3;
+}
+
+.left-panel-top {
+    margin-bottom: 1em;
+}
+
+.home .right-panel {
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.home .right-panel .right-panel-top{
+    padding: 1em;
+    border-radius: 1em;
+    border: 1px solid #d3d3d3;
+    margin-bottom: 1em;
+}
+.home .right-panel .header{
+    border-bottom: 1px solid #d3d3d3;
+}
+.home .right-panel ul{
+    font-size: 1rem;
+    text-decoration: underline dotted;
+    margin: 0;
+}
+.home .right-panel img{
+    margin-left: 1.2rem;
+}
+.home .right-panel .right-panel-bottom{
+    padding: 1em;
+    border-radius: 1em;
+    border: 1px solid #d3d3d3;
+}
+
+ul.microposts {
+    /*margin-left: 4em;*/
+    text-align: left;
+}
+
+ul.microposts li.micropost-item {
+    color: rgba(0, 0, 0, 0.5);
+    list-style-type: square;
+    list-style-position: inside;
+    font-size: 1.6em;
+    line-height: 220%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+form {
+    font-size: 1rem;
+}
+
+.micropost .h2 {
+    padding-bottom:10px;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+.micropost .desc {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: #567;
+}
+
+.micropost ul li {
+    list-style-type: none;
+}
+.micropost .content {
+    font-size: 1rem;
+}

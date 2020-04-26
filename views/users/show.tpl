@@ -1,0 +1,1 @@
+/Users/eric/go/src/b_blog/views/users/show.tpl
