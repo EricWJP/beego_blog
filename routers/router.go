@@ -7,7 +7,7 @@ import (
 
 func init() {
 	beego.Router("/", &controllers.MainController{}, "get:Get")
-	beego.Router("/search", &controllers.MainController{}, "get:Search")
+	beego.Router("/search", &controllers.MainController{}, "get,post:Search")
 	beego.Router("/users", &controllers.UsersController{}, "get:GetAll")
 	beego.Router("/users/:id", &controllers.UsersController{}, "get:GetOne")
 	beego.Router("/users/delete", &controllers.UsersController{}, "delete:Delete")

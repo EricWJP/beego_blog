@@ -26,7 +26,8 @@ func (c *SessionsController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *SessionsController) Post() {
-	flash := beego.NewFlash()
+	//flash := beego.NewFlash()
+	flash := beego.ReadFromRequest(&c.Controller)
 	if c.userId > 0 {
 		c.redirect(beego.URLFor("MainController.Get"))
 	}
@@ -71,6 +72,8 @@ func (c *SessionsController) Post() {
 		}
 		//c.flash.Set("danger", errorMsg)
 		flash.Set("danger", errorMsg)
+		c.Data["flash"] = flash.Data
+		//flash.Store(&c.Controller)
 		//c.flash.Store(&c.Controller)
 		//flash.Store(&c.Controller)
 	}

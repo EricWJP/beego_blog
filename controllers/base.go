@@ -31,7 +31,8 @@ type BaseController struct {
 func (c *BaseController) Prepare() {
 	c.Data["signed"] = false
 	//c.flash = beego.NewFlash()
-	flash := beego.NewFlash()
+	//flash := beego.NewFlash()
+	flash := beego.ReadFromRequest(&c.Controller)
 	c.hexKey = beego.AppConfig.String("hexkey")
 	controllerName, actionName := c.GetControllerAndAction()
 	c.controllerName = controllerName
@@ -42,6 +43,7 @@ func (c *BaseController) Prepare() {
 	session, ok := c.Ctx.GetSecureCookie(c.hexKey, "session")
 	if !ok || session == "null" {
 		if !c.is("get") && c.controllerName != "SessionsController" &&
+			c.controllerName != "MainController" &&
 			!(c.controllerName == "UsersController" && c.actionName == "Post") {
 			//c.flash.Set("info", "请登录")
 			flash.Set("info", "请登录")
@@ -68,8 +70,6 @@ func (c *BaseController) Prepare() {
 			c.redirect(beego.URLFor("SessionsController.Post"))
 		}
 	}
-
-	//fmt.Println(beego.BConfig.WebConfig.FlashName)
 }
 
 //后期准备

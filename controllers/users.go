@@ -4,6 +4,8 @@ import (
 	"b_blog/models"
 	"errors"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/validation"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -31,7 +33,8 @@ func (c *UsersController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *UsersController) Post() {
-	flash := beego.NewFlash()
+	//flash := beego.NewFlash()
+	flash := beego.ReadFromRequest(&c.Controller)
 	if c.is("post") {
 		var v models.Users
 		formData := c.Ctx.Request.Form
@@ -41,14 +44,23 @@ func (c *UsersController) Post() {
 			}
 			//c.flash.Set("danger", "两次密码不一致！！！")
 			flash.Set("danger", "两次密码不一致！！！")
+			c.Data["flash"] = flash.Data
+			//flash.Store(&c.Controller)
 			//c.Data["flash"] = c.flash.Data
 			c.TplName = "create.tpl"
 			c.Render()
 			c.StopRun()
 		}
 		v.Name = formData["Name"][0]
-		v.Gender = formData["Gender"][0]
-		v.Phone = formData["Phone"][0]
+		if len(formData["Phone"]) != 0 {
+			v.Phone = formData["Phone"][0]
+		}
+		if len(formData["Gender"]) != 0 {
+			v.Gender = formData["Gender"][0]
+		}
+		if len(formData["Phone"]) != 0 {
+			v.Phone = formData["Phone"][0]
+		}
 		v.Email = formData["Email"][0]
 		v.Password = models.GetEncryptPassword(formData["Password"][0])
 		v.Status = true
@@ -57,23 +69,51 @@ func (c *UsersController) Post() {
 		v.Comment = formData["Comment"][0]
 		currentTime := time.Now()
 		v.UpdatedAt, v.CreatedAt = currentTime, currentTime
-		if _, err := models.AddUsers(&v); err == nil {
-			c.Ctx.Output.SetStatus(200)
-			//c.flash.Success("Sign Up Successfully!")
-			flash.Success("Sign Up Successfully!")
-			flash.Store(&c.Controller)
-			//c.Data["flash"] = c.flash.Data
-			c.redirect(beego.URLFor("SessionsController.Post"))
+		if err := c.ParseForm(&v); err != nil {
+			c.Data["ParseFormErr"] = "数据解析到结构体错误"
 		} else {
-			for k, v := range formData {
-				c.Data[k] = v[0]
+			user := v
+			valid := validation.Validation{} //创建验证数据对象
+			//验证用户名不能为空且最小长度为6
+			// Message 是自定义消息
+			valid.Required(user.Name, "Name").Message("用户名不能为空")
+			//valid.MinSize(user.Name, 6,"Name").Message("用户名最短为6位" )
+			valid.Required(user.Password, "Password").Message("密码不能为空")
+			valid.MinSize(user.Password, 6, "Pwd").Message("密码最短为6位")
+			//valid.Numeric(user.Age, "Age").Message("年龄只能为数字" )
+			//valid.Length(user.IdCard, 18,"IdCard").Message("身份证格式非法" )
+			valid.Required(user.Email, "Email").Message("邮箱不能为空")
+			valid.Email(user.Email, "Email").Message("邮箱格式非法")
+			valid.Required(user.Phone, "Phone").Message("手机不能为空")
+			valid.Mobile(user.Phone, "Phone").Message("手机格式非法")
+			if valid.HasErrors() {
+				// 如果有错误信息，证明验证没通过
+				// 打印错误信息
+				for _, err := range valid.Errors {
+					flash.Set("danger", flash.Data["danger"], err.Key+err.Message+"！")
+				}
+				re := regexp.MustCompile(`(%!!\(string=)|(\)!\(string=)|(\)\(EXTRA string=)|\)`)
+				flash.Set("danger", re.ReplaceAllLiteralString(flash.Data["danger"], ""))
+				c.Data["flash"] = flash.Data
+				for k, v := range formData {
+					c.Data[k] = v[0]
+				}
+				c.TplName = "create.tpl"
+			} else {
+				if _, err := models.AddUsers(&v); err == nil {
+					c.Ctx.Output.SetStatus(200)
+					flash.Success("Sign Up Successfully!")
+					flash.Store(&c.Controller)
+					c.redirect(beego.URLFor("SessionsController.Post"))
+				} else {
+					for k, v := range formData {
+						c.Data[k] = v[0]
+					}
+					flash.Set("danger", flash.Data["danger"], "\n", err.Error())
+					c.TplName = "create.tpl"
+				}
 			}
-			//c.flash.Set("danger", err.Error())
-			flash.Set("danger", err.Error())
-			//c.Data["flash"] = c.flash.Data
-			c.TplName = "create.tpl"
 		}
-		//c.ServeJSON()
 	} else {
 		c.TplName = "create.tpl"
 	}
@@ -170,7 +210,8 @@ func (c *UsersController) GetAll() {
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *UsersController) Put() {
-	flash := beego.NewFlash()
+	//flash := beego.NewFlash()
+	flash := beego.ReadFromRequest(&c.Controller)
 	if c.userId == 0 {
 		//c.flash.Set("warning", "您还未登录，请登录后再操作！！！")
 		flash.Set("warning", "您还未登录，请登录后再操作！！！")
@@ -190,10 +231,14 @@ func (c *UsersController) Put() {
 		v.UpdatedAt = time.Now()
 		if err := models.UpdateUsersById(v); err == nil {
 			flash.Success("Updated Successfully!")
+			c.Data["flash"] = flash.Data
+			//flash.Store(&c.Controller)
 			c.Data["json"] = v
 		} else {
 			c.Data["json"] = v
 			flash.Set("danger", err.Error())
+			c.Data["flash"] = flash.Data
+			//flash.Store(&c.Controller)
 		}
 	} else {
 		c.Data["json"] = c.currentUser
@@ -220,7 +265,8 @@ func (c *UsersController) Delete() {
 }
 
 func (c *UsersController) ResetPassword() {
-	flash := beego.NewFlash()
+	//flash := beego.NewFlash()
+	flash := beego.ReadFromRequest(&c.Controller)
 	if c.userId == 0 {
 		//c.flash.Set("warning", "您还未登录，请登录后再操作！！！")
 		flash.Set("warning", "您还未登录，请登录后再操作！！！")
@@ -234,7 +280,7 @@ func (c *UsersController) ResetPassword() {
 		//beego.ReadFromRequest(&c.Controller)
 		//userId := strings.TrimSpace(c.GetString("id", 0))
 		userPassword := strings.TrimSpace(c.GetString("Password"))
-		userPasswordConfirmation := strings.TrimSpace(c.GetString("PasswordConformation"))
+		userPasswordConfirmation := strings.TrimSpace(c.GetString("PasswordConfirmation"))
 		if userPassword != "" && userPassword == userPasswordConfirmation {
 			user, _ = models.GetUsersById(c.userId)
 			user.Password = models.GetEncryptPassword(userPassword)
@@ -242,10 +288,14 @@ func (c *UsersController) ResetPassword() {
 				c.Data["Name"] = c.userName
 				//c.flash.Success("修改成功！")
 				flash.Success("修改成功！")
+				c.Data["flash"] = flash.Data
+				//flash.Store(&c.Controller)
 			}
 		} else {
 			//c.flash.Set("danger", "密码不一致！！！")
 			flash.Set("danger", "密码不一致！！！")
+			c.Data["flash"] = flash.Data
+			//flash.Store(&c.Controller)
 		}
 	}
 }
