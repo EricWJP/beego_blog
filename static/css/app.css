@@ -1,6 +1,13 @@
 a {
     color: #567;
 }
+
+.main {
+    max-width: 1440px;
+    margin: auto;
+    min-width: 800px
+}
+
 .home {
     max-width: 90%;
     display: flex;
@@ -11,6 +18,12 @@ a {
     margin: 0 2% 0 0;
     flex: 2.5 1 auto;
     max-width: 75%;
+}
+
+.page {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
 }
 
 .left-panel .title {
@@ -49,12 +62,29 @@ a {
     border: 1px solid #d3d3d3;
 }
 
-ul.microposts {
-    /*margin-left: 4em;*/
+.left-panel ul.microposts {
+    margin-right: auto;
     text-align: left;
 }
 
 ul.microposts li.micropost-item {
+    color: rgba(0, 0, 0, 0.5);
+    list-style-type: square;
+    list-style-position: inside;
+    font-size: 1.6em;
+    line-height: 220%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+div.microposts ul {
+    margin-right: 4em;
+    text-align: left;
+    padding: 0;
+}
+
+div.microposts ul li.micropost-item {
     color: rgba(0, 0, 0, 0.5);
     list-style-type: square;
     list-style-position: inside;

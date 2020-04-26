@@ -97,15 +97,35 @@ func (c *MicropostsController) GetOne() {
 // @Failure 403
 // @router / [get]
 func (c *MicropostsController) GetAll() {
-	//c.ServeJSON()
+	var page int64
+
+	if pg, err := c.GetInt64("page"); err == nil {
+		page = pg
+	} else {
+		page = 1
+	}
+	if page <= 0 {
+		page = 1
+	}
+
 	query := map[string]interface{}{}
 	fields := []string{"Id", "Title", "Content", "UserId", "CreatedAt"}
 	sortby := []string{"id"}
-	order := []string{"desc"}
-	offset := int64(0)
-	limit := int64(20)
-	microposts, _ := models.GetAllMicroposts(query, fields, sortby, order, offset, limit)
+	order := []string{"asc"}
+	offset := (page - 1) * c.pageSize
+	limit := c.pageSize
+	microposts, count, _ := models.GetAllMicroposts(query, fields, sortby, order, offset, limit)
 	c.Data["microposts"] = microposts
+	c.Data["curPage"] = page
+	startPage := (page - 1) / 5 * 5
+	maxPage := (count-1)/limit + 1
+	var pages []int64
+	for i := startPage + 1; i <= maxPage && i < startPage+6; i++ {
+		pages = append(pages, i)
+	}
+	c.Data["maxPage"] = maxPage
+	c.Data["pages"] = pages
+	c.Data["href"] = "/microposts?"
 	c.TplName = "index.tpl"
 }
 
@@ -121,7 +141,7 @@ func (c *MicropostsController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.ParseInt(idStr, 0, 64)
 	v := models.Microposts{Id: id}
-	json.Unmarshal(c.Ctx.Input.RequestBody, &v)
+	_ = json.Unmarshal(c.Ctx.Input.RequestBody, &v)
 	if err := models.UpdateMicropostsById(&v); err == nil {
 		c.Data["json"] = "OK"
 	} else {
@@ -157,20 +177,41 @@ func (c *MicropostsController) MyMicroposts() {
 		flash.Store(&c.Controller)
 		c.redirect(beego.URLFor("SessionsController.Post"))
 	}
+	var page int64
+
+	if pg, err := c.GetInt64("page"); err == nil {
+		page = pg
+	} else {
+		page = 1
+	}
+	if page <= 0 {
+		page = 1
+	}
+
 	query := map[string]interface{}{}
 	query["user_id"] = c.userId
-	now := time.Now()
-	query["created_at__gte"] = time.Date(now.Year(), now.Month(),
-		now.Day(), 0, 0, 0, 0,
-		time.Local).AddDate(0, 0,
-		(int(time.Monday-now.Weekday())+(-7))%(-7))
+	//now := time.Now()
+	//query["created_at__gte"] = time.Date(now.Year(), now.Month(),
+	//	now.Day(), 0, 0, 0, 0,
+	//	time.Local).AddDate(0, 0,
+	//	(int(time.Monday-now.Weekday())+(-7))%(-7))
 	fields := []string{"Id", "Title", "Content", "UserId", "CreatedAt"}
-	sortby := []string{"Id"}
-	order := []string{"desc"}
-	offset := int64(0)
-	limit := int64(20)
-	microposts, _ := models.GetAllMicroposts(query, fields, sortby, order, offset, limit)
+	sortby := []string{"id"}
+	order := []string{"asc"}
+	offset := (page - 1) * c.pageSize
+	limit := c.pageSize
+	microposts, count, _ := models.GetAllMicroposts(query, fields, sortby, order, offset, limit)
 	c.Data["microposts"] = microposts
+	c.Data["curPage"] = page
+	startPage := (page - 1) / 5 * 5
+	maxPage := (count-1)/limit + 1
+	var pages []int64
+	for i := startPage + 1; i <= maxPage && i < startPage+6; i++ {
+		pages = append(pages, i)
+	}
+	c.Data["maxPage"] = maxPage
+	c.Data["pages"] = pages
+	c.Data["href"] = "/my_microposts?"
 	c.Data["currentUser"] = c.currentUser
 	c.TplName = "my_microposts.tpl"
 }

@@ -47,7 +47,7 @@ func GetMicropostsById(id int64) (v *Microposts, err error) {
 // GetAllMicroposts retrieves all Microposts matches certain condition. Returns empty list if
 // no records exist
 func GetAllMicroposts(query map[string]interface{}, fields []string, sortby []string, order []string,
-	offset int64, limit int64) (ml []interface{}, err error) {
+	offset int64, limit int64) (ml []interface{}, Cou int64, err error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable(new(Microposts))
 	// query k=v
@@ -68,7 +68,7 @@ func GetAllMicroposts(query map[string]interface{}, fields []string, sortby []st
 				} else if order[i] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
+					return nil, 0, errors.New("Error: Invalid order. Must be either [asc|desc]")
 				}
 				sortFields = append(sortFields, orderby)
 			}
@@ -82,16 +82,16 @@ func GetAllMicroposts(query map[string]interface{}, fields []string, sortby []st
 				} else if order[0] == "asc" {
 					orderby = v
 				} else {
-					return nil, errors.New("Error: Invalid order. Must be either [asc|desc]")
+					return nil, 0, errors.New("Error: Invalid order. Must be either [asc|desc]")
 				}
 				sortFields = append(sortFields, orderby)
 			}
 		} else if len(sortby) != len(order) && len(order) != 1 {
-			return nil, errors.New("Error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
+			return nil, 0, errors.New("Error: 'sortby', 'order' sizes mismatch or 'order' size is not 1")
 		}
 	} else {
 		if len(order) != 0 {
-			return nil, errors.New("Error: unused 'order' fields")
+			return nil, 0, errors.New("Error: unused 'order' fields")
 		}
 	}
 
@@ -113,9 +113,10 @@ func GetAllMicroposts(query map[string]interface{}, fields []string, sortby []st
 				ml = append(ml, m)
 			}
 		}
-		return ml, nil
+		max, _ := qs.OrderBy(sortFields...).RelatedSel().Count()
+		return ml, max, nil
 	}
-	return nil, err
+	return nil, 0, err
 }
 
 // UpdateMicroposts updates Microposts by Id and returns error if

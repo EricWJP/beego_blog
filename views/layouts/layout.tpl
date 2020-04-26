@@ -4,8 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>{{.siteName}}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/bootstrap-4.4.1.min.css" />
     <link rel="stylesheet" href="/static/css/app.css" type="text/css" />
 {{/*    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js"*/}}
 {{/*            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"*/}}
@@ -19,7 +18,7 @@
             crossorigin="anonymous"></script>
 </head>
 <body style="background-color: #f5f5d5;color: #111;font-size: 12px;">
-    <div>
+    <div class="main">
         <div class="container" style="border-bottom: 1px solid #d3d3d3;max-width: 90%;font-size: 1.25rem;">
             <nav class="navbar navbar-expand-lg navbar-light" >
                 <a class="navbar-brand" href="/">Eric的博客</a>
@@ -76,14 +75,13 @@
                 </div>
             </nav>
         </div>
-    </div>
-    <div class="container" style="margin-bottom: 40px;">
-        {{range $a,$b := .flash}}
-            <div class="alert alert-{{$a}}">{{$b}}</div>
-        {{end}}
-    </div>
+        <div class="container" style="margin-bottom: 40px;">
+            {{range $a,$b := .flash}}
+                <div class="alert alert-{{$a}}">{{$b}}</div>
+            {{end}}
+        </div>
 
-    {{.LayoutContent}}
-
+        {{.LayoutContent}}
+    </div>
 </body>
 </html>

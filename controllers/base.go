@@ -19,7 +19,7 @@ type BaseController struct {
 	userName    string
 	Status      bool
 	IsAdmin     bool
-	pageSize    int
+	pageSize    int64
 	allowUrl    string
 	noLayout    bool
 	hexKey      string
@@ -29,6 +29,7 @@ type BaseController struct {
 
 //前期准备
 func (c *BaseController) Prepare() {
+	c.pageSize = 20
 	c.Data["signed"] = false
 	//c.flash = beego.NewFlash()
 	//flash := beego.NewFlash()
@@ -58,9 +59,6 @@ func (c *BaseController) Prepare() {
 			c.userName, _ = c.session["userName"]
 			c.Status, _ = strconv.ParseBool(c.session["Status"])
 			c.IsAdmin, _ = strconv.ParseBool(c.session["IsAdmin"])
-			if c.pageSize, err = strconv.Atoi(c.session["pageSize"]); err != nil {
-				c.pageSize = 20
-			}
 			c.Data["signed"] = true
 			c.currentUser, _ = models.GetUsersById(c.userId)
 		} else {

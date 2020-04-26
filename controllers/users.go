@@ -151,6 +151,7 @@ func (c *UsersController) GetOne() {
 // @Failure 403
 // @router / [get]
 func (c *UsersController) GetAll() {
+	var page int64
 	var fields []string
 	var sortby []string
 	var order []string
@@ -158,26 +159,35 @@ func (c *UsersController) GetAll() {
 	var limit int64 = 10
 	var offset int64
 
+	if pg, err := c.GetInt64("page"); err == nil {
+		page = pg
+	} else {
+		page = 1
+	}
+	offset = (page - 1) * c.pageSize
+	limit = c.pageSize
+	sortby = append(sortby, "id")
+	order = append(order, "desc")
 	// fields: col1,col2,entity.col3
-	if v := c.GetString("fields"); v != "" {
-		fields = strings.Split(v, ",")
-	}
-	// limit: 10 (default is 10)
-	if v, err := c.GetInt64("limit"); err == nil {
-		limit = v
-	}
-	// offset: 0 (default is 0)
-	if v, err := c.GetInt64("offset"); err == nil {
-		offset = v
-	}
-	// sortby: col1,col2
-	if v := c.GetString("sortby"); v != "" {
-		sortby = strings.Split(v, ",")
-	}
-	// order: desc,asc
-	if v := c.GetString("order"); v != "" {
-		order = strings.Split(v, ",")
-	}
+	//if v := c.GetString("fields"); v != "" {
+	//	fields = strings.Split(v, ",")
+	//}
+	//// limit: 10 (default is 10)
+	//if v, err := c.GetInt64("limit"); err == nil {
+	//	limit = v
+	//}
+	//// offset: 0 (default is 0)
+	//if v, err := c.GetInt64("offset"); err == nil {
+	//	offset = v
+	//}
+	//// sortby: col1,col2
+	//if v := c.GetString("sortby"); v != "" {
+	//	sortby = strings.Split(v, ",")
+	//}
+	//// order: desc,asc
+	//if v := c.GetString("order"); v != "" {
+	//	order = strings.Split(v, ",")
+	//}
 	// query: k:v,k:v
 	if v := c.GetString("query"); v != "" {
 		for _, cond := range strings.Split(v, ",") {
